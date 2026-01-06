@@ -348,7 +348,7 @@ public class InputHelper {
         int exerciseIndex = -1;
         while (true) {
             System.out.println("");
-            exerciseIndex = ConsoleUtils.readRequiredInt("Select exercise number: ", true); // Allow 0
+            exerciseIndex = ConsoleUtils.readRequiredInt("Select exercise number: ", true);
 
             if (exerciseIndex == 0) {
                 return null;
