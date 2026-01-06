@@ -1,15 +1,16 @@
-package HEAT.service;
+package heat.service;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDate;
 
-import HEAT.dao.DatabaseManager;
-import HEAT.model.Workout;
-import HEAT.model.Goal;
-import HEAT.model.GoalStatus;
-import HEAT.model.StrengthWorkout;
+import heat.dao.DatabaseConnection;
+import heat.dao.GoalDAO;
+import heat.model.Goal;
+import heat.model.GoalStatus;
+import heat.model.StrengthWorkout;
+import heat.model.Workout;
 
 public class GoalService {
     
@@ -19,15 +20,19 @@ public class GoalService {
 
     private List<Goal> goals = new ArrayList<>();
     private List<Goal> activeGoals = new ArrayList<>();
-    private DatabaseManager db;
+    
+    private DatabaseConnection dbConnection;
+    private GoalDAO goalDAO;
+    
     private UserService userService;
 
     public GoalService(UserService userService) {
-        this.db = DatabaseManager.getInstance();
+        this.dbConnection = DatabaseConnection.getInstance();
+        this.goalDAO = new GoalDAO();
         this.userService = userService;
 
         try {
-            List<Goal> loadedGoals = db.loadGoals();
+            List<Goal> loadedGoals = goalDAO.loadGoals();
             if (loadedGoals != null) { goals = loadedGoals; }
 
             this.activeGoals = new ArrayList<>();
@@ -60,9 +65,9 @@ public class GoalService {
                 return;
             }
 
-            db.beginTransaction();
-            db.addGoal(g);
-            db.commitTransaction();
+            dbConnection.beginTransaction();
+            goalDAO.addGoal(g);
+            dbConnection.commitTransaction();
 
             goals.add(0, g);
             activeGoals.add(0, g);
@@ -70,7 +75,7 @@ public class GoalService {
             System.out.println("\t\t\t\t\tGoal successfully created!");
         } catch (Exception e) {
             try {
-                db.rollbackTransaction();
+                dbConnection.rollbackTransaction();
                 System.err.println("\t\t\t\t\t[ ! ]   Error creating goal. Rolled back changes.");
             } catch (Exception ex) {
                 System.err.println("\t\t\t\t\t[ ! ]   Rollback also failed: " + ex.getMessage());
@@ -86,7 +91,7 @@ public class GoalService {
         if (original.getId() != updated.getId()) return false;
 
         try {
-            db.beginTransaction();
+            dbConnection.beginTransaction();
 
             boolean isCompleted = isGoalCompleted(original.getCurrentValue(), updated.getTargetValue(), original.getGoalType());
             
@@ -101,8 +106,8 @@ public class GoalService {
                 updated.setStatus(GoalStatus.ACTIVE);
             }
 
-            db.updateGoal(updated);
-            db.commitTransaction();
+            goalDAO.updateGoal(updated);
+            dbConnection.commitTransaction();
 
             // Update Master List
             for (int i = 0; i < goals.size(); i++) {
@@ -120,7 +125,7 @@ public class GoalService {
 
             return true;
         } catch (Exception e) {
-            try { db.rollbackTransaction(); } catch (Exception ex) {}
+            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
             System.err.println("\t\t\t\t\t[ ! ]   Failed to update goal: " + e.getMessage());
             return false;
         }
@@ -129,9 +134,9 @@ public class GoalService {
     // [D] Delete
     public boolean deleteGoal(Goal g) {
         try {
-            db.beginTransaction();
-            db.deleteGoal(g.getId());
-            db.commitTransaction();
+            dbConnection.beginTransaction();
+            goalDAO.deleteGoal(g.getId());
+            dbConnection.commitTransaction();
 
             goals.removeIf(existing -> existing.getId() == g.getId());
             activeGoals.removeIf(existing -> existing.getId() == g.getId());
@@ -173,7 +178,7 @@ public class GoalService {
             if (isRelevantToGoal) {
                 double newValue = getCurrentValue(type, goalExercise, g.getStartDate());
                 g.setCurrentValue(newValue);
-                db.updateGoalCurrentValue(g.getId(), newValue);
+                goalDAO.updateGoalCurrentValue(g.getId(), newValue);
 
                 boolean metTarget = isGoalCompleted(newValue, g.getTargetValue(), type);
 
@@ -183,7 +188,7 @@ public class GoalService {
                 }
                 else if (g.getStatus() == GoalStatus.COMPLETED && !metTarget) {
                     g.setStatus(GoalStatus.ACTIVE);
-                    db.updateGoalStatus(g.getId(), "ACTIVE");
+                    goalDAO.updateGoalStatus(g.getId(), "ACTIVE");
                     revivedGoals.add(g);
                     System.out.println("\t\t\t\t\tGoal downgraded to ACTIVE: " + g.getGoalTitle());
                 }
@@ -210,7 +215,7 @@ public class GoalService {
             }
 
             g.setCurrentValue(currentWeight);
-            db.updateGoalCurrentValue(g.getId(), currentWeight);
+            goalDAO.updateGoalCurrentValue(g.getId(), currentWeight);
 
             boolean isComplete = false;
 
@@ -244,16 +249,16 @@ public class GoalService {
                 return userService.getWeightKg();
             }
             else if (goalType.equals("reps")) {
-                return (double) db.getMostRepsDone(exerciseName, startDate);
+                return (double) goalDAO.getMostRepsDone(exerciseName, startDate);
             }
             else if (goalType.equals("duration")) {
-                return (double) db.getTotalMinutes(exerciseName, startDate);
+                return (double) goalDAO.getTotalMinutes(exerciseName, startDate);
             }
             else if (goalType.equals("weight lifted")) {
-                return db.getMaxWeightLifted(exerciseName, startDate);
+                return goalDAO.getMaxWeightLifted(exerciseName, startDate);
             }
             else {
-                return (double) db.getWorkoutFrequency(exerciseName, startDate);
+                return (double) goalDAO.getWorkoutFrequency(exerciseName, startDate);
             }
         } catch (SQLException e) {
             System.out.println("\t\t\t\t\t[ ! ]   Error fetching current goal value: " + e.getMessage());
@@ -297,17 +302,17 @@ public class GoalService {
 
         if (!expiredIds.isEmpty()) {
             try {
-                db.beginTransaction(); 
+                dbConnection.beginTransaction(); 
                 
-                db.updateGoalStatusBatch(expiredIds, GoalStatus.EXPIRED);
+                goalDAO.updateGoalStatusBatch(expiredIds, GoalStatus.EXPIRED);
                 
-                db.commitTransaction(); 
+                dbConnection.commitTransaction(); 
 
                 archiveExpiredGoals(expiredIds);
 
                 System.out.println("\t\t\t\t\tCleaned up " + expiredIds.size() + " expired goals.");
             } catch (SQLException e) {
-                try { db.rollbackTransaction(); } catch (Exception ex) {}
+                try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
                 System.out.println("\t\t\t\t\t[ ! ]   Failed to update expired goals: " + e.getMessage());
             }
         }

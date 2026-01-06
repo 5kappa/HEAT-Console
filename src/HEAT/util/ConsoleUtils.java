@@ -1,4 +1,4 @@
-package HEAT.util;
+package heat.util;
 
 import java.util.Scanner;
 import java.time.LocalDate;

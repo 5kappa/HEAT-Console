@@ -1,15 +1,17 @@
-package HEAT.service;
+package heat.service;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-import HEAT.dao.DatabaseManager;
-import HEAT.model.BodyMetric;
-import HEAT.model.Goal;
-import HEAT.model.GoalStatus;
-import HEAT.model.User;
+import heat.dao.DatabaseConnection;
+import heat.dao.UserDAO;
+import heat.dao.GoalDAO;
+import heat.model.BodyMetric;
+import heat.model.Goal;
+import heat.model.GoalStatus;
+import heat.model.User;
 
 public class UserService {
     
@@ -17,20 +19,25 @@ public class UserService {
     // Fields & Constructor
     // ============================================================
 
-    private DatabaseManager db;
+    private DatabaseConnection dbConnection;
+    private UserDAO userDAO;
+    private GoalDAO goalDAO;
+
     private User currentUser = null;
     private List<BodyMetric> bodyMetricHistory = new ArrayList<>();
 
     private GoalService goalService;
 
     public UserService() {
-        this.db = DatabaseManager.getInstance();
+        this.dbConnection = DatabaseConnection.getInstance();
+        this.userDAO = new UserDAO();
+        this.goalDAO = new GoalDAO();
 
         try {
-            User loadedUserProfile = db.loadUserProfile();
+            User loadedUserProfile = userDAO.loadUserProfile();
             if (loadedUserProfile != null) { currentUser = loadedUserProfile; }
 
-            List<BodyMetric> loadedBodyMetrics = db.loadBodyMetrics();
+            List<BodyMetric> loadedBodyMetrics = userDAO.loadBodyMetrics();
             if (loadedBodyMetrics != null) { bodyMetricHistory = loadedBodyMetrics; }
 
             System.out.println("UserService initialized.");
@@ -51,14 +58,14 @@ public class UserService {
     // [C] Register New User
     public void saveUserProfile(String name, int age, double height, double weight, String sex) {
         try {
-            db.beginTransaction();
+            dbConnection.beginTransaction();
 
             double bmi = calculateBMI(weight, height);
             double bmr = calculateBMR(height, weight, age, sex);
 
             User user = new User(name, age, height, weight, sex, bmi, bmr);
 
-            db.saveUserProfile(user);
+            userDAO.saveUserProfile(user);
             
             List<Goal> completedGoals = goalService.evaluateWeightGoals(weight);
 
@@ -66,11 +73,11 @@ public class UserService {
                 List<Integer> ids = new ArrayList<>();
                 for (Goal g : completedGoals) ids.add(g.getId());
 
-                db.updateGoalStatusBatch(ids, GoalStatus.COMPLETED);
+                goalDAO.updateGoalStatusBatch(ids, GoalStatus.COMPLETED);
                 System.out.println("\n\t\t\t\t\tYou reached your weight goal!");
             }
 
-            db.commitTransaction();
+            dbConnection.commitTransaction();
 
             currentUser = user;
 
@@ -80,7 +87,7 @@ public class UserService {
             
         } catch (Exception e) {
             try {
-                db.rollbackTransaction();
+                dbConnection.rollbackTransaction();
                 System.err.println("Error saving user profile. Rolled back changes.");
             } catch (Exception ex) {
                 System.err.println("Rollback also failed: " + ex.getMessage());
@@ -94,9 +101,9 @@ public class UserService {
     // [U] Profile Updating (for when body metrics are changed)
     public boolean updateProfile(User updatedUser) {
         try {
-            db.beginTransaction();
+            dbConnection.beginTransaction();
             
-            db.updateUserProfile(updatedUser);
+            userDAO.updateUserProfile(updatedUser);
             
             // Check Goals
             List<Goal> completedGoals = new ArrayList<>();
@@ -108,11 +115,11 @@ public class UserService {
                 List<Integer> ids = new ArrayList<>();
                 for (Goal g : completedGoals) ids.add(g.getId());
                 
-                db.updateGoalStatusBatch(ids, GoalStatus.COMPLETED);
+                goalDAO.updateGoalStatusBatch(ids, GoalStatus.COMPLETED);
                 System.out.println("\n\t\t\t\t\tYou reached your weight goal!");
             }
 
-            db.commitTransaction();
+            dbConnection.commitTransaction();
             
             this.currentUser = updatedUser;
             
@@ -123,7 +130,7 @@ public class UserService {
             return true;
 
         } catch (Exception e) {
-            try { db.rollbackTransaction(); } catch (Exception ex) {}
+            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
             System.out.println("\t\t\t\t\t[ ! ]   Error updating profile: " + e.getMessage());
             return false;
         }
@@ -132,8 +139,8 @@ public class UserService {
     // [U] Profile Updating (for when User Profile is changed)
     public boolean correctProfileDetails(User updatedUser) {
         try {
-            db.beginTransaction();
-            db.updateUserProfile(updatedUser);
+            dbConnection.beginTransaction();
+            userDAO.updateUserProfile(updatedUser);
 
             if (!bodyMetricHistory.isEmpty()) {
                 BodyMetric latest = bodyMetricHistory.get(0); 
@@ -153,7 +160,7 @@ public class UserService {
                         latest.getDate()
                     );
 
-                    db.updateBodyMetric(updatedMetric);
+                    userDAO.updateBodyMetric(updatedMetric);
                     bodyMetricHistory.set(0, updatedMetric);
                 }
             }
@@ -166,11 +173,11 @@ public class UserService {
             if (!completedGoals.isEmpty()) {
                 List<Integer> ids = new ArrayList<>();
                 for (Goal g : completedGoals) ids.add(g.getId());
-                db.updateGoalStatusBatch(ids, GoalStatus.COMPLETED);
+                goalDAO.updateGoalStatusBatch(ids, GoalStatus.COMPLETED);
                 System.out.println("\n\t\t\t\t\tYou reached your weight goal!");
             }
 
-            db.commitTransaction();
+            dbConnection.commitTransaction();
             this.currentUser = updatedUser;
 
             if (!completedGoals.isEmpty()) {
@@ -180,7 +187,7 @@ public class UserService {
             return true;
 
         } catch (Exception e) {
-            try { db.rollbackTransaction(); } catch (Exception ex) {}
+            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
             System.out.println("\t\t\t\t\tError correcting profile: " + e.getMessage());
             return false;
         }
@@ -220,7 +227,7 @@ public class UserService {
 
     public void addBodyMetric(BodyMetric bm) {
         try {
-            db.insertNewBodyMetric(bm);
+            userDAO.insertNewBodyMetric(bm);
             bodyMetricHistory.add(0, bm);
         } catch (SQLException e) {
             System.out.println("\t\t\t\t\t[ ! ]   Error adding body metric: " + e.getMessage());
@@ -234,9 +241,9 @@ public class UserService {
         }
 
         try {
-            db.beginTransaction();
+            dbConnection.beginTransaction();
 
-            db.updateBodyMetric(updated);
+            userDAO.updateBodyMetric(updated);
 
             if (isLatest) {
                 System.out.println("\t\t\t\t\tSyncing user profile with updated metric...");
@@ -253,14 +260,14 @@ public class UserService {
                     currentUser.getLastWorkoutDate()
                 );
 
-                db.saveUserProfile(updatedUser);
+                userDAO.saveUserProfile(updatedUser);
 
                 goalService.evaluateWeightGoals(updatedUser.getWeightKg());
                 
                 this.currentUser = updatedUser;
             }
 
-            db.commitTransaction();
+            dbConnection.commitTransaction();
 
             for (int i = 0; i < bodyMetricHistory.size(); i++) {
                 if (bodyMetricHistory.get(i).getId() == updated.getId()) {
@@ -274,7 +281,7 @@ public class UserService {
             return true;
 
         } catch (Exception e) {
-            try { db.rollbackTransaction(); } catch (Exception ex) {}
+            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
             System.out.println("\t\t\t\t\t[ ! ]   Error updating body metric: " + e.getMessage());
             return false;
         }
@@ -289,9 +296,9 @@ public class UserService {
         }
 
         try {
-            db.beginTransaction();
+            dbConnection.beginTransaction();
             
-            db.deleteBodyMetric(bm.getId());
+            userDAO.deleteBodyMetric(bm.getId());
 
             if (isLatest) {
                 // If we are deleting the newest entry, revert to the *next* one down
@@ -312,7 +319,7 @@ public class UserService {
                         currentUser.getLastWorkoutDate()
                     );
                     
-                    db.updateUserProfile(updatedUser);
+                    userDAO.updateUserProfile(updatedUser);
                     
                     goalService.evaluateWeightGoals(updatedUser.getWeightKg());
 
@@ -323,13 +330,13 @@ public class UserService {
                 }
             }
             
-            db.commitTransaction();
+            dbConnection.commitTransaction();
             
             bodyMetricHistory.remove(bm);
             return true;
 
         } catch (Exception e) {
-            try { db.rollbackTransaction(); } catch (Exception ex) {}
+            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
             System.out.println("\t\t\t\t\tError deleting body metric: " + e.getMessage());
             return false;
         }
@@ -366,7 +373,7 @@ public class UserService {
 
         if (isChanged) {
             try {
-                db.updateUserProfile(currentUser);
+                userDAO.updateUserProfile(currentUser);
             } catch (SQLException e) {
                 System.out.println("\t\t\t\t\t[ ! ] Failed to save streak progress.");
             }

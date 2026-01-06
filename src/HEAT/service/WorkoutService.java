@@ -1,10 +1,13 @@
-package HEAT.service;
+package heat.service;
 
 import java.util.*;
 import java.time.LocalDate;
 import java.sql.*;
-import HEAT.dao.DatabaseManager;
-import HEAT.model.*;
+
+import heat.dao.DatabaseConnection;
+import heat.dao.WorkoutDAO;
+import heat.dao.GoalDAO;
+import heat.model.*;
 
 public class WorkoutService {
 
@@ -24,24 +27,30 @@ public class WorkoutService {
 
     private UserService userService;
     private GoalService goalService;
-    private DatabaseManager db;
+    
+    private DatabaseConnection dbConnection;
+    private WorkoutDAO workoutDAO;
+    private GoalDAO goalDAO;
 
     public WorkoutService(GoalService goalService, UserService userService) {
-        this.db = DatabaseManager.getInstance();
+        this.dbConnection = DatabaseConnection.getInstance();
+        this.workoutDAO = new WorkoutDAO();
+        this.goalDAO = new GoalDAO();
+        
         this.goalService = goalService;
         this.userService = userService;
 
         try {
-            List<Workout> loadedWorkouts = db.loadWorkouts();
+            List<Workout> loadedWorkouts = workoutDAO.loadWorkouts();
             if (loadedWorkouts != null) { workouts = loadedWorkouts; }
 
-            Map<String, PersonalRecord> loadedPRs = db.loadPersonalRecords();
+            Map<String, PersonalRecord> loadedPRs = workoutDAO.loadPersonalRecords();
             if (loadedPRs != null) { personalRecords = loadedPRs; }
 
-            List<Quote> loadedQuotes = db.loadQuotes();
+            List<Quote> loadedQuotes = workoutDAO.loadQuotes();
             if (loadedQuotes != null) { this.quoteCatalog = sortQuotes(loadedQuotes); }
 
-            List<Activity> loadedActivities = db.loadActivities();
+            List<Activity> loadedActivities = workoutDAO.loadActivities();
             if (loadedActivities != null) { sortActivities(loadedActivities); }
             
             System.out.println("WorkoutService initialized.");
@@ -61,13 +70,13 @@ public class WorkoutService {
     // [C] Create
     public void logWorkout(Workout w) {
         try {
-            db.beginTransaction();
+            dbConnection.beginTransaction();
 
             // Save workout (DATABASE)
             if (w instanceof StrengthWorkout) {
-                db.saveStrengthWorkout(w);
+                workoutDAO.saveStrengthWorkout(w);
             } else {
-                db.saveCardioWorkout(w);
+                workoutDAO.saveCardioWorkout(w);
             }
 
             // Check and update PR (DATABASE)
@@ -90,14 +99,14 @@ public class WorkoutService {
 
             if (!completedGoals.isEmpty()) {
                 completedGoalsIds = goalService.getCompletedGoalsId(completedGoals);
-                db.updateGoalStatusBatch(completedGoalsIds, GoalStatus.COMPLETED);
+                goalDAO.updateGoalStatusBatch(completedGoalsIds, GoalStatus.COMPLETED);
 
                 for (Goal g : completedGoals) {
                     System.out.println("\t\t\t\t\tGoal completed: " + g.getGoalTitle());
                 }
             }
 
-            db.commitTransaction();
+            dbConnection.commitTransaction();
 
             // Save workout (LOCAL)
             workouts.add(0, w);
@@ -115,7 +124,7 @@ public class WorkoutService {
             
         } catch (Exception e) {
             try {
-                db.rollbackTransaction();
+                dbConnection.rollbackTransaction();
                 System.err.println("\t\t\t\t\t[ ! ]   Error saving workout. Rolled back changes.");
             } catch (Exception ex) {
                 System.err.println("\t\t\t\t\t[ ! ]   Rollback also failed: " + ex.getMessage());
@@ -134,9 +143,9 @@ public class WorkoutService {
         }
 
         try {
-            db.beginTransaction();
+            dbConnection.beginTransaction();
 
-            db.updateWorkout(updated);
+            workoutDAO.updateWorkout(updated);
 
             String prKey = generateKey(updated);
             PersonalRecord existingPR = personalRecords.get(prKey);
@@ -156,8 +165,8 @@ public class WorkoutService {
             }
 
             if (wasTheRecordHolder) {
-                db.recalculatePR(updated.getName(), prKey, updated.getType());
-                this.personalRecords = db.loadPersonalRecords();
+                workoutDAO.recalculatePR(updated.getName(), prKey, updated.getType());
+                this.personalRecords = workoutDAO.loadPersonalRecords();
             } else {
                 if (isNewPR(updated, existingPR)) {
                     updatePRDatabase(updated);
@@ -167,7 +176,7 @@ public class WorkoutService {
 
             goalService.refreshGoalsForWorkout(updated);
 
-            db.commitTransaction();
+            dbConnection.commitTransaction();
 
             // Update local cache
             for (int i = 0; i < workouts.size(); i++) {
@@ -181,7 +190,7 @@ public class WorkoutService {
 
             return true;
         } catch (Exception e) {
-            try { db.rollbackTransaction(); } catch (Exception ex) {}
+            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
             System.err.println("\t\t\t\t\t[ ! ]   Failed to update workout: " + e.getMessage());
             e.printStackTrace();
             return false;
@@ -191,27 +200,27 @@ public class WorkoutService {
     // [D] Delete
     public boolean deleteWorkout(Workout w) {
         try {
-            db.beginTransaction();
+            dbConnection.beginTransaction();
 
-            db.deleteWorkout(w.getId());
+            workoutDAO.deleteWorkout(w.getId());
 
             String PRName = generateKey(w);
             PersonalRecord currentPR = personalRecords.get(PRName);
 
             if (matchesCurrentPR(w, currentPR)) {
-                db.recalculatePR(w.getName(), PRName, w.getType());
-                this.personalRecords = db.loadPersonalRecords();
+                workoutDAO.recalculatePR(w.getName(), PRName, w.getType());
+                this.personalRecords = workoutDAO.loadPersonalRecords();
             }
 
             goalService.refreshGoalsForWorkout(w);
 
-            db.commitTransaction();
+            dbConnection.commitTransaction();
 
             workouts.removeIf(existing -> existing.getId() == w.getId());
 
             return true;
         } catch (Exception e) {
-            try { db.rollbackTransaction(); } catch (Exception ex) {}
+            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
             System.err.println("\t\t\t\t\t[ ! ]   Failed to delete workout: " + e.getMessage());
             return false;
         }
@@ -277,7 +286,7 @@ public class WorkoutService {
 
     public boolean deletePR(String prName) {
         try {
-            db.deletePR(prName);
+            workoutDAO.deletePR(prName);
             personalRecords.remove(prName);
             return true;
         } catch (SQLException e) {
@@ -317,7 +326,7 @@ public class WorkoutService {
             weight = sw.getExternalWeightKg(); 
         }
 
-        db.updatePersonalRecord(exerciseName, weight, reps, duration, date);
+        workoutDAO.updatePersonalRecord(exerciseName, weight, reps, duration, date);
     }
 
     private PersonalRecord fetchOldPR(Workout w) throws SQLException {
@@ -462,7 +471,7 @@ public class WorkoutService {
     public void testDatabaseConnection() {
         System.out.println("\n=== DATABASE CONNECTION TEST ===");
         try {
-            try (Connection conn = db.getConnection()) {
+            try (Connection conn = dbConnection.getConnection()) {
                 System.out.println("✓ Connected to database successfully!");
                 System.out.println("Database URL: " + conn.getMetaData().getURL());
                 

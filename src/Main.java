@@ -1,20 +1,27 @@
 import java.io.IOException;
 import java.sql.SQLException;
 
-import HEAT.dao.DatabaseManager;
-import HEAT.service.*;
-import HEAT.ui.ConsoleDashboard;
-
+import heat.dao.DatabaseConnection;
+import heat.dao.WorkoutDAO;
+import heat.service.*;
+import heat.ui.ConsoleDashboard;
 public class Main {
     public static void main(String[] args) {
 
         try {
-            DatabaseManager db = DatabaseManager.getInstance();
-            db.performInitialSetup();
+            // Initialize Database Connection (Creates tables if missing)
+            DatabaseConnection.getInstance();
+
+            // Perform Data Setup (Loads CSVs if tables are empty)
+            WorkoutDAO workoutDAO = new WorkoutDAO();
+            workoutDAO.performInitialSetup();
+
         } catch (SQLException | IOException e) {
+            System.err.println("Critical Error during startup: " + e.getMessage());
             e.printStackTrace();
         }
 
+        // Initialize Services
         UserService userService = new UserService();
         GoalService goalService = new GoalService(userService);
         WorkoutService workoutService = new WorkoutService(goalService, userService);

@@ -1,4 +1,4 @@
-package HEAT.model;
+package heat.model;
 
 public class Quote {
     private int id;

@@ -1,4 +1,4 @@
-package HEAT.model;
+package heat.model;
 
 import java.time.LocalDate;
 

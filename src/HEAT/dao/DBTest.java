@@ -1,4 +1,4 @@
-package HEAT.dao;
+package heat.dao;
 import java.sql.Connection;
 
 public class DBTest {
@@ -6,10 +6,10 @@ public class DBTest {
     public static void main(String[] args) {
 
         
-        DatabaseManager db = DatabaseManager.getInstance();
+        DatabaseConnection dbConnection = DatabaseConnection.getInstance();
 
         // Test connection
-        try (Connection conn = db.getConnection()) {
+        try (Connection conn = dbConnection.getConnection()) {
             if (conn != null && !conn.isClosed()) {
                 System.out.println("Connected to shared SQLite DB");
             }

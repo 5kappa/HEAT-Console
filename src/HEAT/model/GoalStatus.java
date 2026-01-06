@@ -1,4 +1,4 @@
-package HEAT.model;
+package heat.model;
 
 public enum GoalStatus {
     ACTIVE,
