@@ -1,0 +1,80 @@
+Bicep Curl,Strength,Arms,3.5,0
+Concentration Curl,Strength,Arms,3.5,0
+Hammer Curl,Strength,Arms,3.5,0
+Overhead Tricep Extension,Strength,Arms,3.5,0
+Preacher Curl,Strength,Arms,3.5,0
+Reverse Curl,Strength,Arms,3.5,0
+Skull Crusher,Strength,Arms,3.5,0
+Tricep Dips,Strength,Arms,3.5,1
+Tricep Pushdown,Strength,Arms,3.5,0
+Wrist Curl,Strength,Arms,3.5,0
+Barbell Bench Press,Strength,Chest,3.5,0
+Cable Crossover,Strength,Chest,3.5,0
+Chest Dips,Strength,Chest,3.5,1
+Chest Fly,Strength,Chest,3.5,0
+Dumbbell Pullover,Strength,Chest,3.5,0
+Floor Press,Strength,Chest,3.5,0
+Incline Dumbbell Press,Strength,Chest,3.5,0
+Landmine Press,Strength,Chest,3.5,0
+Push-ups,Strength,Chest,3.5,0.64
+Deadlift,Strength,Back,3.5,0
+Dumbbell Row,Strength,Back,3.5,0
+Face Pull,Strength,Back,3.5,0
+Lat Pulldown,Strength,Back,3.5,0
+Pull-ups,Strength,Back,3.5,1
+Seated Cable Row,Strength,Back,3.5,0
+Straight-Arm Pulldown,Strength,Back,3.5,0
+Superman,Strength,Back,3.5,0.6
+Arnold Press,Strength,Shoulders,3.5,0
+Cable External Rotation,Strength,Shoulders,3.5,0
+Front Raise,Strength,Shoulders,3.5,0
+Lateral Raise,Strength,Shoulders,3.5,0
+Overhead Shoulder Press,Strength,Shoulders,3.5,0
+Reverse Fly,Strength,Shoulders,3.5,0
+Shrugs,Strength,Shoulders,3.5,0
+Upright Row,Strength,Shoulders,3.5,0
+Barbell Squat,Strength,Legs,3.5,0.75
+Box Step-Ups,Strength,Legs,3.5,1
+Bulgarian Split Squat,Strength,Legs,3.5,0.6
+Calf Raise,Strength,Legs,3.5,1
+Goblet Squat,Strength,Legs,3.5,0.75
+Hip Thrust,Strength,Legs,3.5,0
+Leg Curl,Strength,Legs,3.5,0
+Leg Extension,Strength,Legs,3.5,0
+Leg Press,Strength,Legs,3.5,0
+Lunges,Strength,Legs,3.5,0.88
+Romanian Deadlift,Strength,Legs,3.5,0
+Bicycle Crunch,Strength,Core,3.5,0.6
+Hanging Leg Raise,Strength,Core,3.5,0.6
+Mountain Climbing,Strength,Core,3.5,0.6
+Plank,Strength,Core,3.5,0.6
+Russian Twist,Strength,Core,3.5,0.6
+V-Ups,Strength,Core,3.5,0.6
+Weighted Sit-Up,Strength,Core,3.5,0.6
+Burpees,Cardio,HIIT,8,0
+Butt Kicks,Cardio,HIIT,8,0
+Crab Walk,Cardio,HIIT,8,0
+High Knees,Cardio,HIIT,8,0
+Inchworms,Cardio,HIIT,8,0
+Jumping Rope,Cardio,HIIT,12.3,0
+Lateral Shuffle,Cardio,HIIT,8,0
+Mountain Climbers,Cardio,HIIT,8,0
+Plank Jacks,Cardio,HIIT,8,0
+Standing Toe Touches,Cardio,HIIT,8,0
+Toe Taps,Cardio,HIIT,8,0
+Cycling (Outdoor),Cardio,Endurance,8,0
+Cycling (Stationary),Cardio,Endurance,6.8,0
+Dancing,Cardio,Endurance,7,0
+Running,Cardio,Endurance,9.8,0
+Walking,Cardio,Endurance,4.3,0
+Badminton (Casual),Cardio,Recreational,4.7,0
+Badminton (Competitive),Cardio,Recreational,7,0
+Basketball,Cardio,Recreational,6.5,0
+Billiards,Cardio,Recreational,2.5,0
+Boxing,Cardio,Recreational,12.8,0
+Football (Casual),Cardio,Recreational,7,0
+Football (Competitive),Cardio,Recreational,10,0
+Swimming,Cardio,Recreational,5.8,0
+Taekwondo,Cardio,Recreational,10.3,0
+Tennis,Cardio,Recreational,8,0
+Volleyball,Cardio,Recreational,6,0
