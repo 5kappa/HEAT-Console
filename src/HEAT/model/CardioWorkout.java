@@ -62,11 +62,11 @@ public class CardioWorkout extends Workout {
     @Override
     public String toString() {
         String typeStr = String.format("[%s]:", this.type);
-        String distanceStr = String.format("~%.1f km", this.distanceKm);
+        String distanceStr = String.format("%.1f km", this.distanceKm);
         String durationStr = String.format("%d mins", this.durationMinutes);
         String caloriesBurnedStr = String.format("%.0f cal",  this.caloriesBurned);
 
-        String str = String.format(" |   %11s %-24s  |   %-17s   |   %-37s   |   %-8s   |   %-8s   | %-10s  ",
+        String str = String.format(" |  %11s %-25s  |   %-17s   |   %-37s   |   %-8s   |   %-8s   | %-10s  ",
             typeStr,
             this.name,
             distanceStr,

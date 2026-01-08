@@ -289,7 +289,21 @@ public class InputHelper {
 
         double caloriesBurned = WorkoutService.calculateCaloriesBurned(workoutService.getMetForActivity(selectedExerciseName), userService.getWeightKg(), duration);
 
-        cw = new CardioWorkout(selectedExerciseName, workoutType, today, caloriesBurned, duration);
+        double distanceKm = 0.0;
+        boolean distanceProvided = false;
+
+        if (isDistanceActivity(selectedExerciseName)) {
+            distanceKm = ConsoleUtils.readRequiredDouble("Enter distance (km) (0 to skip/auto-calc): ", true);
+            if (distanceKm > 0) {
+                distanceProvided = true;
+            }
+        }
+
+        if (distanceProvided) {
+            cw = new CardioWorkout(0, selectedExerciseName, workoutType, today, caloriesBurned, duration, distanceKm);
+        } else {
+            cw = new CardioWorkout(selectedExerciseName, workoutType, today, caloriesBurned, duration);
+        }
 
         if (cw != null) {
             workoutService.logWorkout(cw);
@@ -299,6 +313,20 @@ public class InputHelper {
             ConsoleUtils.printCentered("Workout logged successfully!");
             System.out.println("");
         }
+    }
+
+    // Helper method to decide if we should ask for distance
+    private boolean isDistanceActivity(String name) {
+        if (name == null) return false;
+        name = name.toLowerCase();
+        return name.contains("run") || 
+               name.contains("cycle") || 
+               name.contains("bike") || 
+               name.contains("swim") || 
+               name.contains("walk") || 
+               name.contains("row") ||
+               name.contains("jog") ||
+               name.contains("hike");
     }
 
     private String selectStrengthExerciseName() {
@@ -710,10 +738,8 @@ public class InputHelper {
 
         if (workoutService.updateWorkout(original, updated)) {
             System.out.println("\t\t\t\t\tUpdate successful!\n");
-
-            userService.checkStreak(updated.getDate());
         } else {
-            System.out.println("\t\t\t\t\tUpdate failed.");
+            System.out.println("\t\t\t\t\t[ ! ]   Update failed.");
         }
     }
 
@@ -725,14 +751,14 @@ public class InputHelper {
 
         int totalItems = workoutList.size();
         
-        String tableHeader = String.format("   %s |\t\t%s\t\t\t|   %s     |\t%s\t    |\t%s   |   %s   |   %s",
+        String tableHeader = String.format("   %-2s | %-39s | %-21s | %-41s |%-13s |%-13s | %-11s",
             "id",
-            "Exercise Name",
-            "Reps / Distance",
-            "Training Volume & Weight Used",
-            "Duration",
-            "Calories",
-            "Date"
+            "   Exercise Name",
+            "   Reps / Distance",
+            "   Training Volume & Weight Used",
+            "   Duration",
+            "   Calories",
+            " Date"
         );
 
         if (totalItems <= 10) {
@@ -888,10 +914,10 @@ public class InputHelper {
 
         int totalItems = prList.size();
         
-        String tableHeader = String.format("   %s |\t\t%s\t\t\t\t\t\t |\t%s\t\t\t     |\t\t%s",
+        String tableHeader = String.format("   %-2s |   %-60s   |   %-37s   |   %-37s",
             "id",
-            "Exercise Name",
-            "Personal Record",
+            "Exercise Name", 
+            "Personal Record", 
             "Date Achieved"
         );
 

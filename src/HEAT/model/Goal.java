@@ -57,28 +57,6 @@ public class Goal {
     public void setCurrentValue(double newValue) { this.currentValue = newValue; }
 
     @Override
-    // public String toString() {
-    //     String unit;
-
-    //     if (goalType.equals("weight loss") || goalType.equals("weight gain")) unit = "kg (bodyweight)";
-    //     else if (goalType.equals("reps")) unit = "reps";
-    //     else if (goalType.equals("duration")) unit = "mins";
-    //     else if (goalType.equals("weight lifted")) unit = "kg (lifted)";
-    //     else unit = "times worked out";
-
-    //     if (exerciseName != null) {
-    //         return String.format("%s - %s: %.1f %s | Started: %s%s | %s |",
-    //             goalTitle, exerciseName, targetValue, unit, startDate,
-    //             endDate == null ? "" : String.format(", End: %s", endDate), status.name()
-    //         );
-    //     } else {
-    //         return String.format("%s - [%s]: %.1f %s | Started: %s%s | %s |",
-    //             goalTitle, goalType.toUpperCase(), targetValue, unit, startDate,
-    //             endDate == null ? "" : String.format(", End: %s", endDate), status.name()
-    //         );
-    //     }
-    // }
-
     public String toString() {
         String unit = "";
 

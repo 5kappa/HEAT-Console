@@ -199,7 +199,7 @@ public class UserService {
                 %37s%6s
                 %37s%6s%12s%-10s%13s%-19s%12s%-15s%37s
                 %37s%6s%12s%-10s%13s%-19s%12s%-15s%37s
-                %37s%6s%12s%-10s%13s%-19s
+                %37s%6s
                 """, 
                 "", "_O/   ",
                 "", "  \\   ", "",
@@ -210,9 +210,7 @@ public class UserService {
                 String.format("Sex  :  %s", getSex()), "", 
                 String.format("Weight  :  %.1f kg", getWeightKg()), "", 
                 String.format("BMR  :  %.2f", getBMR()), "", 
-                "", "  \\   ", "",
-                "", "", 
-                String.format("Streak :  %d \uD83D\uDD25", getStreak())
+                "", "  \\   "
             );
         return profileDetails;
     }
@@ -346,36 +344,74 @@ public class UserService {
     // Streak & Calculations
     // ============================================================
 
-    public void checkStreak(LocalDate activityDate) {
-        LocalDate lastDate = currentUser.getLastWorkoutDate();
-        int currentStreak = currentUser.getCurrentStreak();
-        boolean isChanged = false;
-
-        if (lastDate == null) {
-            currentUser.setCurrentStreak(1);
-            currentUser.setLastWorkoutDate(activityDate);
-            isChanged = true;
-        } 
-        else if (activityDate.isAfter(lastDate)) {
-            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(lastDate, activityDate);
-
-            if (daysBetween == 1) {
-                currentUser.setCurrentStreak(currentStreak + 1);
-                System.out.println("\t\t\t\t\tStreak Up! " + (currentStreak + 1) + " days in a row!");
-            } else {
-                currentUser.setCurrentStreak(1);
-                System.out.println("\t\t\t\t\tStreak reset. Starting over at 1.");
+    public void recalculateStreak(List<LocalDate> allWorkoutDates) {
+        if (allWorkoutDates == null || allWorkoutDates.isEmpty()) {
+            if (currentUser.getCurrentStreak() != 0) {
+                currentUser.setCurrentStreak(0);
+                currentUser.setLastWorkoutDate(null);
+                updateUserProfileSilent();
             }
-            
-            currentUser.setLastWorkoutDate(activityDate);
-            isChanged = true;
+            return;
         }
 
-        if (isChanged) {
-            try {
-                userDAO.updateUserProfile(currentUser);
-            } catch (SQLException e) {
-                System.out.println("\t\t\t\t\t[ ! ] Failed to save streak progress.");
+        List<LocalDate> sortedDates = allWorkoutDates.stream()
+            .distinct()
+            .sorted((d1, d2) -> d2.compareTo(d1))
+            .toList();
+
+        int newStreak = 1;
+        LocalDate lastDate = sortedDates.get(0);
+
+        for (int i = 0; i < sortedDates.size() - 1; i++) {
+            LocalDate current = sortedDates.get(i);
+            LocalDate previous = sortedDates.get(i + 1);
+
+            long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(previous, current);
+
+            if (daysBetween == 1) {
+                newStreak++;
+            } else if (daysBetween > 1) {
+                break;
+            }
+        }
+
+        if (currentUser.getCurrentStreak() != newStreak || !lastDate.equals(currentUser.getLastWorkoutDate())) {
+            currentUser.setCurrentStreak(newStreak);
+            currentUser.setLastWorkoutDate(lastDate);
+            
+            updateUserProfileSilent();
+            System.out.println("\t\t\t\t\tStreak recalculated: " + newStreak + " day(s)");
+        }
+    }
+
+    private void updateUserProfileSilent() {
+        try {
+            userDAO.updateUserProfile(currentUser);
+        } catch (SQLException e) {
+            System.out.println("\t\t\t\t\t[ ! ]   Failed to save streak progress.");
+        }
+    }
+
+    public void validateStreakOnStartup() {
+        if (currentUser == null || currentUser.getLastWorkoutDate() == null) {
+            return;
+        }
+
+        LocalDate lastDate = currentUser.getLastWorkoutDate();
+        LocalDate today = LocalDate.now();
+
+        long daysBetween = java.time.temporal.ChronoUnit.DAYS.between(lastDate, today);
+
+        if (daysBetween > 1) {
+            if (currentUser.getCurrentStreak() > 0) {
+                System.out.println("\n\t\t\t\t\t[ ! ] Notice: It's been " + daysBetween + " days. Streak reset to 0.");
+                currentUser.setCurrentStreak(0);
+                
+                try {
+                    userDAO.updateUserProfile(currentUser);
+                } catch (SQLException e) {
+                    System.out.println("\t\t\t\t\t[ ! ] Failed to save streak reset.");
+                }
             }
         }
     }

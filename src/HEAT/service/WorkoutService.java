@@ -120,7 +120,7 @@ public class WorkoutService {
             }
             
             // Check Streak (Since a workout was just logged)
-            userService.checkStreak(w.getDate());
+            triggerStreakUpdate();
             
         } catch (Exception e) {
             try {
@@ -188,6 +188,8 @@ public class WorkoutService {
 
             workouts.sort((w1, w2) -> w2.getDate().compareTo(w1.getDate()));
 
+            triggerStreakUpdate();
+
             return true;
         } catch (Exception e) {
             try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
@@ -217,6 +219,8 @@ public class WorkoutService {
             dbConnection.commitTransaction();
 
             workouts.removeIf(existing -> existing.getId() == w.getId());
+
+            triggerStreakUpdate();
 
             return true;
         } catch (Exception e) {
@@ -383,6 +387,14 @@ public class WorkoutService {
             }
         }
         return baseName;
+    }
+
+    private void triggerStreakUpdate() {
+        List<LocalDate> dates = new ArrayList<>();
+        for (Workout w : workouts) {
+            dates.add(w.getDate());
+        }
+        userService.recalculateStreak(dates);
     }
 
     // ============================================================

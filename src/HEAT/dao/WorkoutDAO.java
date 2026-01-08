@@ -40,7 +40,7 @@ public class WorkoutDAO {
             pstmt.setDouble(10, sw.getBodyWeightFactor());
             
             if (pstmt.executeUpdate() > 0) {
-                System.out.println("\t\t\t\t\t[ ! ]   Workout saved to database!");
+                System.out.println("\t\t\t\t\tWorkout saved to database!");
                 try (ResultSet rs = pstmt.getGeneratedKeys()) {
                     if (rs.next()) sw.setId(rs.getInt(1));
                 }

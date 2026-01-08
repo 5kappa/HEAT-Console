@@ -16,9 +16,10 @@ public class ConsoleDashboard {
         this.userService = userService;
         this.inputHelper = new InputHelper(workoutService, userService, goalService);
         
-        System.out.println("\n✓ Fitness Service initialized");
-        System.out.println("✓ Database connection ready");
-        System.out.println("\nCurrent streak: " + userService.getStreak());
+        userService.validateStreakOnStartup();
+
+        System.out.println("Fitness Service initialized");
+        System.out.println("Database connection ready");
     }
 
     // ============================================================
