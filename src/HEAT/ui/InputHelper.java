@@ -30,6 +30,7 @@ public class InputHelper {
 
         while (!(userService.isRegistered())) {
             ConsoleUtils.printCentered("[ User Registration ]");
+            System.out.println("");
 
             name = ConsoleUtils.readRequiredString(String.format("%27s", "Enter your name  :  "));
             int age = ConsoleUtils.readRequiredInt(String.format("%27s", "Enter your age  :  "), false);
@@ -1318,7 +1319,7 @@ public class InputHelper {
 
     public void printGoals(List<Goal> goalsList) {
         if (goalsList.isEmpty()) {
-            System.out.println("\t\t\t\t\tNo goals set yet.");
+            System.out.println("\t\t\t\t\tNo goals set yet.\n");
             return;
         }
 
@@ -1524,8 +1525,10 @@ public class InputHelper {
         BodyMetric bm = new BodyMetric(0, newAge, newHeight, newWeight, newBMI, today);
         userService.addBodyMetric(bm);
         
-        System.out.println("\t\t\t\t\tBody metrics updated successfully!");
+        System.out.println("");
         ConsoleUtils.printBorder();
+        ConsoleUtils.printCentered("Body metrics updated successfully!");
+        System.out.println("");
     }
 
     public void showBodyMetricHistory() {
@@ -1793,6 +1796,7 @@ public class InputHelper {
         System.out.println("");
         ConsoleUtils.printThinBorder();
         
+        System.out.println("\t\t\t\t\tPress Enter to return...");
         ConsoleUtils.pause(); 
     }
 }

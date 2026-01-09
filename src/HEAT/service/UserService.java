@@ -40,8 +40,7 @@ public class UserService {
             List<BodyMetric> loadedBodyMetrics = userDAO.loadBodyMetrics();
             if (loadedBodyMetrics != null) { bodyMetricHistory = loadedBodyMetrics; }
 
-            System.out.println("UserService initialized.");
-            System.out.println("Body metric history loaded: " + bodyMetricHistory.size() + "\n");
+            System.out.println("[OK] UserService: " + bodyMetricHistory.size() + " body metric entries loaded");
 
         } catch (SQLException e) {
             System.out.println("Warning: could not load persisted data: " + e.getMessage());

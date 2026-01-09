@@ -53,9 +53,7 @@ public class WorkoutService {
             List<Activity> loadedActivities = workoutDAO.loadActivities();
             if (loadedActivities != null) { sortActivities(loadedActivities); }
             
-            System.out.println("WorkoutService initialized.");
-            System.out.println("Workouts loaded: " + workouts.size());
-            System.out.println("PRs loaded: " + personalRecords.size() + "\n");
+            System.out.println("[OK] WorkoutService: " + workouts.size() + " workouts and " + personalRecords.size() + " PRs loaded");
             
         } catch (Exception e) {
             System.out.println("Warning: could not load persisted data: " + e.getMessage());

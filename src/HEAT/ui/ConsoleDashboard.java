@@ -17,9 +17,6 @@ public class ConsoleDashboard {
         this.inputHelper = new InputHelper(workoutService, userService, goalService);
         
         userService.validateStreakOnStartup();
-
-        System.out.println("Fitness Service initialized");
-        System.out.println("Database connection ready");
     }
 
     // ============================================================

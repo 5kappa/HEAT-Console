@@ -5,8 +5,11 @@ import heat.dao.DatabaseConnection;
 import heat.dao.WorkoutDAO;
 import heat.service.*;
 import heat.ui.ConsoleDashboard;
+import heat.util.ConsoleUtils;
 public class Main {
     public static void main(String[] args) {
+
+        ConsoleUtils.printSplashHeader();
 
         try {
             // Initialize Database Connection (Creates tables if missing)
@@ -30,29 +33,10 @@ public class Main {
 
         ConsoleDashboard dashboard = new ConsoleDashboard(workoutService, userService, goalService);
 
-        System.out.print("""
-                        []=============================================================================================================================================================[]
-                                                                                                                                                                                         
-                                      ,                   HHHHHHHHH     HHHHHHHHH         EEEEEEEEEEEEEEEEEEEEEE                 AAAAAAAAAAAAAAA           TTTTTTTTTTTTTTTTTTTTTTT              
-                                      *@                  H:::::::H     H:::::::H         E::::::::::::::::::::E                 A:::::::::::::A           T:::::::::::::::::::::T              
-                                      @:@                 H:::::::H     H:::::::H         E::::::::::::::::::::E                 A:::::::::::::A           T:::::::::::::::::::::T              
-                                      @::@@@              HH::::::H     H::::::HH         EE::::::EEEEEEEEE::::E                 A:::::::::::::A           T:::::TT:::::::TT:::::T              
-                                      @:::::@&              H:::::H     H:::::H             E:::::E       EEEEEE                  A:::::A:::::A            TTTTTT  T:::::T  TTTTTT              
-                                      @::@::::@             H:::::H     H:::::H             E:::::E                              A:::::A A:::::A                   T:::::T                      
-                                ,     @::@*@:::&  ,         H::::::HHHHH::::::H             E::::::EEEEEEEEEE                   A:::::AAAAA:::::A                  T:::::T                      
-                                @,  #:::@'`@:::@ @@         H:::::::::::::::::H             E:::::::::::::::E                  A:::::::::::::::::A                 T:::::T                      
-                               @:@.@:::@    @:::@:@         H:::::::::::::::::H             E:::::::::::::::E                 A:::::::::::::::::::A                T:::::T                      
-                               @::::::@      @::::@ ,       H::::::HHHHH::::::H             E::::::EEEEEEEEEE                A:::::AAAAAAAAAAA:::::A               T:::::T                      
-                              @::::::@       @::::@ @@      H:::::H     H:::::H             E:::::E                         A:::::A           A:::::A              T:::::T                      
-                              @::@::@        @::@::@:@      H:::::H     H:::::H             E:::::E       EEEEEE           A:::::A             A:::::A             T:::::T                      
-                              @:@'@:@         @' `@::@    HH::::::H     H::::::HH         EE::::::EEEEEEEE:::::E         AA::::::AA           AA::::::AA         TT:::::::TT                    
-                              @:@. `@,        '   @:@     H:::::::H     H:::::::H  ####   E::::::::::::::::::::E  ####   A::::::::A           A::::::::A  ####   T:::::::::T  ####       
-                               @:@                @*      H:::::::H     H:::::::H #::::#  E::::::::::::::::::::E #::::#  A::::::::A           A::::::::A #::::#  T:::::::::T #::::#       
-                                `'                '       HHHHHHHHH     HHHHHHHHH  ####   EEEEEEEEEEEEEEEEEEEEEE  ####   AAAAAAAAAA           AAAAAAAAAA  ####   TTTTTTTTTTT  ####       
-                                                                                                                                                                                         
-                        []=============================================================================================================================================================[]
-                                                                         Welcome to H.E.A.T.: Health, Exercise, and Activity Tracker                                                   
-                        """);
+        ConsoleUtils.printSplashFooter();
+        ConsoleUtils.pause();
+
+        ConsoleUtils.printWelcomeBanner();
         
         dashboard.displayMenu();
     }

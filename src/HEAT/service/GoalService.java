@@ -42,8 +42,7 @@ public class GoalService {
                 }
             }
 
-            System.out.println("GoalService initialized.");
-            System.out.println("Goals loaded: " + getGoalsSize() + "\n");
+            System.out.println("[OK] GoalService: " + getGoalsSize() + " goals loaded");
 
         } catch (SQLException e) {
             System.out.println("Warning: could not load persisted data: " + e.getMessage());

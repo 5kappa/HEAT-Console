@@ -45,7 +45,7 @@ public class BodyMetric {
             heightStr,
             weightStr,
             this.BMI,
-            date.toString()
+            this.date.isEqual(LocalDate.now()) ? "Today" : this.date.toString()
         );
 
         return str;

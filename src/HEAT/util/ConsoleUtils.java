@@ -194,12 +194,49 @@ public class ConsoleUtils {
     }
 
     public static void pause() {
-        System.out.println("\t\t\t\t\tPress Enter to return...");
         try {
             input.nextLine(); 
         } catch (Exception e) {
             // Fallback if scanner isn't available
             try { System.in.read(); } catch (Exception ignored) {}
         }
+    }
+    
+    public static void printSplashHeader() {
+        System.out.println("=========================================");
+        System.out.println("      H.E.A.T. CONSOLE LOADING...");
+        System.out.println("=========================================");
+    }
+
+    public static void printWelcomeBanner() {
+        System.out.print("""
+                        []=============================================================================================================================================================[]
+                                                                                                                                                                                         
+                                      ,                   HHHHHHHHH     HHHHHHHHH         EEEEEEEEEEEEEEEEEEEEEE                 AAAAAAAAAAAAAAA           TTTTTTTTTTTTTTTTTTTTTTT              
+                                      *@                  H:::::::H     H:::::::H         E::::::::::::::::::::E                 A:::::::::::::A           T:::::::::::::::::::::T              
+                                      @:@                 H:::::::H     H:::::::H         E::::::::::::::::::::E                 A:::::::::::::A           T:::::::::::::::::::::T              
+                                      @::@@@              HH::::::H     H::::::HH         EE::::::EEEEEEEEE::::E                 A:::::::::::::A           T:::::TT:::::::TT:::::T              
+                                      @:::::@&              H:::::H     H:::::H             E:::::E       EEEEEE                  A:::::A:::::A            TTTTTT  T:::::T  TTTTTT              
+                                      @::@::::@             H:::::H     H:::::H             E:::::E                              A:::::A A:::::A                   T:::::T                      
+                                ,     @::@*@:::&  ,         H::::::HHHHH::::::H             E::::::EEEEEEEEEE                   A:::::AAAAA:::::A                  T:::::T                      
+                                @,  #:::@'`@:::@ @@         H:::::::::::::::::H             E:::::::::::::::E                  A:::::::::::::::::A                 T:::::T                      
+                               @:@.@:::@    @:::@:@         H:::::::::::::::::H             E:::::::::::::::E                 A:::::::::::::::::::A                T:::::T                      
+                               @::::::@      @::::@ ,       H::::::HHHHH::::::H             E::::::EEEEEEEEEE                A:::::AAAAAAAAAAA:::::A               T:::::T                      
+                              @::::::@       @::::@ @@      H:::::H     H:::::H             E:::::E                         A:::::A           A:::::A              T:::::T                      
+                              @::@::@        @::@::@:@      H:::::H     H:::::H             E:::::E       EEEEEE           A:::::A             A:::::A             T:::::T                      
+                              @:@'@:@         @' `@::@    HH::::::H     H::::::HH         EE::::::EEEEEEEE:::::E         AA::::::AA           AA::::::AA         TT:::::::TT                    
+                              @:@. `@,        '   @:@     H:::::::H     H:::::::H  ####   E::::::::::::::::::::E  ####   A::::::::A           A::::::::A  ####   T:::::::::T  ####       
+                               @:@                @*      H:::::::H     H:::::::H #::::#  E::::::::::::::::::::E #::::#  A::::::::A           A::::::::A #::::#  T:::::::::T #::::#       
+                                `'                '       HHHHHHHHH     HHHHHHHHH  ####   EEEEEEEEEEEEEEEEEEEEEE  ####   AAAAAAAAAA           AAAAAAAAAA  ####   TTTTTTTTTTT  ####       
+                                                                                                                                                                                         
+                        []=============================================================================================================================================================[]
+                                                                         Welcome to H.E.A.T.: Health, Exercise, and Activity Tracker                                                   
+                        """);
+    }
+
+    public static void printSplashFooter() {
+        System.out.println("=========================================");
+        System.out.println("       PRESS ENTER TO START");
+        System.out.println("=========================================");
     }
 }

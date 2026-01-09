@@ -12,7 +12,7 @@ public class DatabaseConnection {
         try {
             connection = DriverManager.getConnection(URL);
             initializeTables();
-            System.out.println("Database initialized successfully.\n");
+            System.out.println("[OK] Database initialized successfully");
         } catch (SQLException e) {
             System.err.println("Error connecting to database: " + e.getMessage());
             e.printStackTrace();
