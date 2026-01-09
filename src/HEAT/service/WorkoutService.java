@@ -100,10 +100,6 @@ public class WorkoutService {
             if (!completedGoals.isEmpty()) {
                 completedGoalsIds = goalService.getCompletedGoalsId(completedGoals);
                 goalDAO.updateGoalStatusBatch(completedGoalsIds, GoalStatus.COMPLETED);
-
-                for (Goal g : completedGoals) {
-                    System.out.println("\t\t\t\t\tGoal completed: " + g.getGoalTitle());
-                }
             }
 
             dbConnection.commitTransaction();
@@ -147,14 +143,25 @@ public class WorkoutService {
 
             workoutDAO.updateWorkout(updated);
 
-            String prKey = generateKey(updated);
-            PersonalRecord existingPR = personalRecords.get(prKey);
-            
+            String oldKey = generateKey(original);
+            String newKey = generateKey(updated);
+
+            if (!oldKey.equals(newKey)) {
+                PersonalRecord oldPR = personalRecords.get(oldKey);
+                
+                if (matchesCurrentPR(original, oldPR)) {
+
+                    workoutDAO.recalculatePR(original.getName(), oldKey, original.getType());
+                    this.personalRecords = workoutDAO.loadPersonalRecords();
+                }
+            }
+
+            PersonalRecord existingPR = personalRecords.get(newKey);
             boolean wasTheRecordHolder = false;
 
             if (existingPR != null && existingPR.getDate().isEqual(original.getDate())) {
                 if (original instanceof StrengthWorkout sw) {
-                    if (prKey.endsWith("(reps)")) {
+                    if (newKey.endsWith("(reps)")) {
                         wasTheRecordHolder = (sw.getRepCount() >= existingPR.getReps());
                     } else {
                         wasTheRecordHolder = (sw.getExternalWeightKg() >= existingPR.getWeight());
@@ -165,7 +172,7 @@ public class WorkoutService {
             }
 
             if (wasTheRecordHolder) {
-                workoutDAO.recalculatePR(updated.getName(), prKey, updated.getType());
+                workoutDAO.recalculatePR(updated.getName(), newKey, updated.getType());
                 this.personalRecords = workoutDAO.loadPersonalRecords();
             } else {
                 if (isNewPR(updated, existingPR)) {
@@ -288,14 +295,34 @@ public class WorkoutService {
         return personalRecords.size();
     }
 
-    public boolean deletePR(String prName) {
-        try {
-            workoutDAO.deletePR(prName);
-            personalRecords.remove(prName);
-            return true;
-        } catch (SQLException e) {
-            System.out.println("\t\t\t\t\t[ ! ]   Error deleting PR: " + e.getMessage());
-            return false;
+public boolean deletePR(String prName) {
+        PersonalRecord pr = personalRecords.get(prName);
+        
+        Workout target = null;
+        
+        if (pr != null) {
+            for (Workout w : workouts) {
+                if (generateKey(w).equals(prName) && w.getDate().equals(pr.getDate())) {
+                     if (matchesCurrentPR(w, pr)) {
+                         target = w;
+                         break;
+                     }
+                }
+            }
+        }
+
+        if (target != null) {
+            System.out.println("\t\t\t\t\t[ i ]   Deleting associated workout record..."); 
+            return deleteWorkout(target); 
+        } else {
+            try {
+                workoutDAO.deletePR(prName);
+                personalRecords.remove(prName);
+                return true;
+            } catch (SQLException e) {
+                System.out.println("\t\t\t\t\t[ ! ]   Error deleting PR: " + e.getMessage());
+                return false;
+            }
         }
     }
 

@@ -58,11 +58,11 @@ public class GoalService {
     // ============================================================
 
     // [C] Create
-    public void createGoal(Goal g) {
+    public boolean createGoal(Goal g) {
         try {
             if (isGoalCompleted(g.getCurrentValue(), g.getTargetValue(), g.getGoalType())) {
-                System.out.println("\t\t\t\t\t[ ! ]   Could not create goal, already completed: " +  g.toString());
-                return;
+                System.out.println("\t\t\t\t\t[ ! ]   Could not create goal, already completed: " +  g.getGoalTitle() + "\n");
+                return false;
             }
 
             dbConnection.beginTransaction();
@@ -72,17 +72,20 @@ public class GoalService {
             goals.add(0, g);
             activeGoals.add(0, g);
 
-            System.out.println("\t\t\t\t\tGoal successfully created!");
+            return true;
+
         } catch (Exception e) {
             try {
                 dbConnection.rollbackTransaction();
                 System.err.println("\t\t\t\t\t[ ! ]   Error creating goal. Rolled back changes.");
+
             } catch (Exception ex) {
                 System.err.println("\t\t\t\t\t[ ! ]   Rollback also failed: " + ex.getMessage());
             }
-            
             System.err.println("\t\t\t\t\t[ ! ]   Failed to create goal: " + e.getMessage());
             e.printStackTrace();
+
+            return false;
         }
     }
 
@@ -283,7 +286,7 @@ public class GoalService {
                     break;
                 }
             }
-            System.out.println("\t\t\t\t\tGoal completed! " + completedGoal.toString());
+            System.out.println("\t\t\t\t\tGoal completed: " + completedGoal.getGoalTitle());
         }
     }
 

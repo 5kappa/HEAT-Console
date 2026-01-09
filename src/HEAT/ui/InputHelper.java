@@ -62,7 +62,6 @@ public class InputHelper {
         System.out.println("");
         ConsoleUtils.printCentered(String.format("Streak  :  %d", userService.getStreak()));
         System.out.println(userService.showProfileDetails());
-        ConsoleUtils.printBorder();
     }
 
     public void showUserProfile() {
@@ -92,6 +91,8 @@ public class InputHelper {
                 default:
                     System.out.println("\t\t\t\t\t[ ! ]   Invalid choice. Please select from 0-1.");
             }
+
+            System.out.println("");
         }
     }
 
@@ -319,14 +320,10 @@ public class InputHelper {
     private boolean isDistanceActivity(String name) {
         if (name == null) return false;
         name = name.toLowerCase();
-        return name.contains("run") || 
-               name.contains("cycle") || 
-               name.contains("bike") || 
-               name.contains("swim") || 
-               name.contains("walk") || 
-               name.contains("row") ||
-               name.contains("jog") ||
-               name.contains("hike");
+        return name.contains("running") || 
+               name.contains("cycling") || 
+               name.contains("swimming") || 
+               name.contains("walking");
     }
 
     private String selectStrengthExerciseName() {
@@ -1094,11 +1091,12 @@ public class InputHelper {
         double currentValue = goalService.getCurrentValue(goalType, exerciseName, startDate);
 
         Goal g = new Goal(goalTitle, exerciseName, startDate, endDate, goalType, currentValue, targetValue);
-        goalService.createGoal(g);
         
-        System.out.println("");
-        ConsoleUtils.printCentered("Goal created successfully!");
-        System.out.println("");
+        if (goalService.createGoal(g)) {    
+            ConsoleUtils.printThinBorder();
+            ConsoleUtils.printCentered("Goal created successfully!");
+            System.out.println("");
+        }
     }
 
     public void showGoalsMenu() {
@@ -1322,7 +1320,7 @@ public class InputHelper {
 
         int totalItems = goalsList.size();
         
-        String tableHeader = String.format("   %s |     %s\t  |  %s\t     | \t%s\t      |\t %s\t\t       | %s | %s   | %s",
+        String tableHeader = String.format("   %-2s |  %-31s  |  %-22s  |  %-20s  |  %-20s  | %-10s | %-10s | %-9s",
             "id",
             "Goal Title / Description",
             "Exercise Name",
@@ -1446,7 +1444,9 @@ public class InputHelper {
         );
         userService.addBodyMetric(bm);
         
+        ConsoleUtils.printBorder();
         ConsoleUtils.printCentered("Successfully updated weight!");
+        System.out.println("");
     }
 
     public void updateBodyMetrics() {
@@ -1663,7 +1663,7 @@ public class InputHelper {
         BodyMetric bm = bodyMetricsList.get(choice - 1);
         
         if (userService.deleteBodyMetric(bm)) {
-            System.out.println("\t\t\t\t\tBody metric deleted successfully!\n");
+            System.out.println("\t\t\t\t\tBody metric deleted successfully!");
         } else {
             System.out.println("\t\t\t\t\tFailed to delete body metric.");
         }
@@ -1677,7 +1677,7 @@ public class InputHelper {
 
         int totalItems = history.size();
 
-        String tableHeader = String.format("   %s |\t\t%s\t\t\t     |\t\t%s\t\t\t    |\t\t%s\t\t       |\t%s",
+        String tableHeader = String.format("   %-2s |   %-32s   |   %-32s   |   %-28s   |   %s",
             "id",
             "Height",
             "Weight",
@@ -1713,6 +1713,10 @@ public class InputHelper {
             ConsoleUtils.printCentered("[ Page " + currentPage + " of " + totalPages + " ]");
             System.out.println("");
 
+            ConsoleUtils.printThinBorderNoNewLine();
+            System.out.println(tableHeader);
+            ConsoleUtils.printThinBorderNoNewLine();
+
             for (int i = start; i < end; i++) {
                 String space = i < 9 ? "    " : "   ";
                 System.out.println(space + (i + 1) + history.get(i));
@@ -1722,7 +1726,7 @@ public class InputHelper {
 
             System.out.println("\t\t\t\t\t[ N ]   Next Page\t\t[ P ]   Prev Page\t\t[ Q ]   Done Viewing\n");
             
-            String choice = ConsoleUtils.readRequiredString("\t\t\t\t\tEnter choice: ").toUpperCase();
+            String choice = ConsoleUtils.readRequiredString("Enter choice: ").toUpperCase();
             System.out.println("");
 
             switch (choice) {
