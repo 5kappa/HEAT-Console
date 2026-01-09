@@ -45,7 +45,7 @@ public class GoalService {
             System.out.println("GoalService initialized.");
             System.out.println("Goals loaded: " + getGoalsSize() + "\n");
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Warning: could not load persisted data: " + e.getMessage());
             e.printStackTrace();
         }
@@ -74,7 +74,7 @@ public class GoalService {
 
             return true;
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             try {
                 dbConnection.rollbackTransaction();
                 System.err.println("\t\t\t\t\t[ ! ]   Error creating goal. Rolled back changes.");
@@ -127,7 +127,7 @@ public class GoalService {
             }
 
             return true;
-        } catch (Exception e) {
+        } catch (SQLException e) {
             try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
             System.err.println("\t\t\t\t\t[ ! ]   Failed to update goal: " + e.getMessage());
             return false;
@@ -315,7 +315,7 @@ public class GoalService {
 
                 System.out.println("\t\t\t\t\tCleaned up " + expiredIds.size() + " expired goals.");
             } catch (SQLException e) {
-                try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
+                try { dbConnection.rollbackTransaction(); } catch (SQLException ex) {}
                 System.out.println("\t\t\t\t\t[ ! ]   Failed to update expired goals: " + e.getMessage());
             }
         }

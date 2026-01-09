@@ -43,7 +43,7 @@ public class UserService {
             System.out.println("UserService initialized.");
             System.out.println("Body metric history loaded: " + bodyMetricHistory.size() + "\n");
 
-        } catch (Exception e) {
+        } catch (SQLException e) {
             System.out.println("Warning: could not load persisted data: " + e.getMessage());
             e.printStackTrace();
         }
@@ -85,11 +85,11 @@ public class UserService {
                 goalService.archiveCompletedGoals(completedGoals);
             }
             
-        } catch (Exception e) {
+        } catch (SQLException e) {
             try {
                 dbConnection.rollbackTransaction();
                 System.err.println("Error saving user profile. Rolled back changes.");
-            } catch (Exception ex) {
+            } catch (SQLException ex) {
                 System.err.println("Rollback also failed: " + ex.getMessage());
             }
             
@@ -129,8 +129,8 @@ public class UserService {
 
             return true;
 
-        } catch (Exception e) {
-            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
+        } catch (SQLException e) {
+            try { dbConnection.rollbackTransaction(); } catch (SQLException ex) {}
             System.out.println("\t\t\t\t\t[ ! ]   Error updating profile: " + e.getMessage());
             return false;
         }
@@ -186,8 +186,8 @@ public class UserService {
 
             return true;
 
-        } catch (Exception e) {
-            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
+        } catch (SQLException e) {
+            try { dbConnection.rollbackTransaction(); } catch (SQLException ex) {}
             System.out.println("\t\t\t\t\tError correcting profile: " + e.getMessage());
             return false;
         }
@@ -278,8 +278,8 @@ public class UserService {
 
             return true;
 
-        } catch (Exception e) {
-            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
+        } catch (SQLException e) {
+            try { dbConnection.rollbackTransaction(); } catch (SQLException ex) {}
             System.out.println("\t\t\t\t\t[ ! ]   Error updating body metric: " + e.getMessage());
             return false;
         }
@@ -333,8 +333,8 @@ public class UserService {
             bodyMetricHistory.remove(bm);
             return true;
 
-        } catch (Exception e) {
-            try { dbConnection.rollbackTransaction(); } catch (Exception ex) {}
+        } catch (SQLException e) {
+            try { dbConnection.rollbackTransaction(); } catch (SQLException ex) {}
             System.out.println("\t\t\t\t\tError deleting body metric: " + e.getMessage());
             return false;
         }

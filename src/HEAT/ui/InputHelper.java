@@ -946,6 +946,10 @@ public class InputHelper {
             ConsoleUtils.printCentered("[ Page " + currentPage + " of " + totalPages + " ]");
             System.out.println("");
 
+            ConsoleUtils.printThinBorderNoNewLine();
+            System.out.println(tableHeader);
+            ConsoleUtils.printThinBorderNoNewLine();
+
             for (int i = start; i < end; i++) {
                 String space = i < 9 ? "    " : "   ";
                 System.out.println(space + (i + 1) + prList.get(i));
