@@ -403,7 +403,7 @@ public class UserService {
 
         if (daysBetween > 1) {
             if (currentUser.getCurrentStreak() > 0) {
-                System.out.println("\n\t\t\t\t\t[ ! ] Notice: It's been " + daysBetween + " days. Streak reset to 0.");
+                System.out.println("[ ! ] Notice: It's been " + daysBetween + " days. Streak reset to 0.");
                 currentUser.setCurrentStreak(0);
                 
                 try {
